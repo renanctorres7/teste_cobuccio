@@ -3,7 +3,7 @@ import 'package:teste_cobuccio/app/core/configs/env_keys.dart';
 
 abstract final class DioClient {
   static Dio create() {
-    const baseUrl = String.fromEnvironment(
+    const baseUrlRaw = String.fromEnvironment(
       EnvKeys.apiBaseUrl,
       defaultValue: 'https://api.coingecko.com/api/v3',
     );
@@ -20,12 +20,30 @@ abstract final class DioClient {
 
     return Dio(
       BaseOptions(
-        baseUrl: baseUrl,
+        baseUrl: _resolveBaseUrl(baseUrlRaw),
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),
         sendTimeout: const Duration(seconds: 15),
         headers: headers,
       ),
     );
+  }
+
+  static String _resolveBaseUrl(String raw) {
+    const fallback = 'https://api.coingecko.com/api/v3';
+    if (raw.isEmpty) {
+      return fallback;
+    }
+
+    final withoutQuery = raw.split('?').first;
+    final apiIndex = withoutQuery.indexOf('/api/v3');
+    if (apiIndex != -1) {
+      return withoutQuery.substring(0, apiIndex + '/api/v3'.length);
+    }
+
+    if (withoutQuery.endsWith('/')) {
+      return withoutQuery.substring(0, withoutQuery.length - 1);
+    }
+    return withoutQuery;
   }
 }
