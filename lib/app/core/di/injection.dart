@@ -18,6 +18,9 @@ import 'package:teste_cobuccio/app/features/transactions/data/cache/transactions
 import 'package:teste_cobuccio/app/features/transactions/infra/datasources/coin_market_datasource.dart';
 import 'package:teste_cobuccio/app/features/transactions/infra/repository/financial_snapshot_provider.dart';
 import 'package:teste_cobuccio/app/features/transactions/infra/repository/list_transactions_repository_impl.dart';
+import 'package:teste_cobuccio/app/presentation/dashboard/view_model/dashboard_cubit.dart';
+import 'package:teste_cobuccio/app/presentation/transaction_detail/view_model/transaction_detail_cubit.dart';
+import 'package:teste_cobuccio/app/presentation/transactions/view_model/transactions_cubit.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -81,4 +84,25 @@ void _registerDomain() {
   );
 }
 
-void _registerPresentation() {}
+void _registerPresentation() {
+  getIt.registerFactory(
+    () => DashboardCubit(
+      getWalletSummaryUseCase: getIt(),
+      listTransactionsUseCase: getIt(),
+      snapshotProvider: getIt(),
+      preferences: getIt(),
+    ),
+  );
+  getIt.registerFactory(
+    () => TransactionsCubit(
+      listTransactionsUseCase: getIt(),
+      snapshotProvider: getIt(),
+    ),
+  );
+  getIt.registerFactoryParam<TransactionDetailCubit, String, void>(
+    (id, _) => TransactionDetailCubit(
+      getTransactionDetailUseCase: getIt(),
+      transactionId: id,
+    ),
+  );
+}

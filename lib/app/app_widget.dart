@@ -13,6 +13,8 @@ class AppWidget extends StatelessWidget {
       title: 'Extrato Financeiro',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
+      darkTheme: buildAppDarkTheme(),
+      themeMode: ThemeMode.system,
       routerConfig: router,
     );
   }

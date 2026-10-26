@@ -1,6 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:teste_cobuccio/app/core/domain/transaction_type_enum.dart';
+import 'package:teste_cobuccio/app/core/errors/failure_message.dart';
 import 'package:teste_cobuccio/app/core/router/app_routes.dart';
+import 'package:teste_cobuccio/app/core/widgets/app_error_view.dart';
+import 'package:teste_cobuccio/app/core/widgets/balance_card.dart';
+import 'package:teste_cobuccio/app/core/widgets/period_totals_chart.dart';
+import 'package:teste_cobuccio/app/core/widgets/total_card.dart';
+import 'package:teste_cobuccio/app/core/widgets/transaction_tile.dart';
+import 'package:teste_cobuccio/app/presentation/dashboard/view_model/dashboard_cubit.dart';
+import 'package:teste_cobuccio/app/presentation/dashboard/view_model/dashboard_state.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -9,18 +19,111 @@ class DashboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Arquitetura pronta'),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () => context.push(AppRoutes.transactions),
-              child: const Text('Ir para Extrato'),
-            ),
-          ],
-        ),
+      body: BlocBuilder<DashboardCubit, DashboardState>(
+        builder: (context, state) {
+          return switch (state) {
+            DashboardLoading() => const Center(
+                child: CircularProgressIndicator(),
+              ),
+            DashboardFailure(:final failure) => AppErrorView(
+                message: failureMessage(failure),
+                onRetry: () => context.read<DashboardCubit>().load(
+                      forceRefresh: true,
+                    ),
+              ),
+            DashboardSuccess(
+              :final summary,
+              :final recentTransactions,
+              :final isBalanceHidden,
+            ) =>
+              RefreshIndicator(
+                onRefresh: () => context.read<DashboardCubit>().load(
+                      forceRefresh: true,
+                    ),
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    BalanceCard(
+                      formattedBalance: summary.availableBalance.format(),
+                      isHidden: isBalanceHidden,
+                      onToggleVisibility: () => context
+                          .read<DashboardCubit>()
+                          .toggleBalanceVisibility(),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TotalCard(
+                            label: 'Entradas',
+                            value: summary.totalIncome.format(),
+                            icon: Icons.arrow_downward,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TotalCard(
+                            label: 'Saídas',
+                            value: summary.totalExpense.format(),
+                            icon: Icons.arrow_upward,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Evolução do período',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    PeriodTotalsChart(
+                      totalIncome: summary.totalIncome,
+                      totalExpense: summary.totalExpense,
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Text(
+                          'Recentes',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const Spacer(),
+                        TextButton(
+                          onPressed: () => context.push(AppRoutes.transactions),
+                          child: const Text('Ver extrato'),
+                        ),
+                      ],
+                    ),
+                    if (recentTransactions.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24),
+                        child: Center(child: Text('Nenhuma transação recente')),
+                      )
+                    else
+                      ...recentTransactions.map(
+                        (tx) => TransactionTile(
+                          transaction: tx,
+                          onTap: () => context.push(
+                            AppRoutes.transactionDetailPath(tx.id),
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 8),
+                    Semantics(
+                      label: 'Legenda de tipos de movimentação',
+                      child: Text(
+                        'Entradas usam seta para baixo · Saídas usam seta para cima '
+                        '(${TransactionTypeEnum.income.name}/${TransactionTypeEnum.expense.name})',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          };
+        },
       ),
     );
   }
