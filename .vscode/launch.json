@@ -2,9 +2,28 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "teste_cobuccio",
+      "name": "teste_cobuccio (debug)",
       "request": "launch",
       "type": "dart",
+      "flutterMode": "debug",
+      "toolArgs": [
+        "--dart-define-from-file=env.json"
+      ]
+    },
+    {
+      "name": "teste_cobuccio (profile)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "toolArgs": [
+        "--dart-define-from-file=env.json"
+      ]
+    },
+    {
+      "name": "teste_cobuccio (release)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
       "toolArgs": [
         "--dart-define-from-file=env.json"
       ]
