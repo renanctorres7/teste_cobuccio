@@ -10,12 +10,14 @@ class GroupedTransactionsList extends StatelessWidget {
     required this.items,
     required this.isLoadingMore,
     required this.onTransactionTap,
+    required this.isHidden,
   });
 
   final ScrollController controller;
   final List<TransactionEntity> items;
   final bool isLoadingMore;
   final ValueChanged<TransactionEntity> onTransactionTap;
+  final bool isHidden;
 
   @override
   Widget build(BuildContext context) {
@@ -49,9 +51,8 @@ class GroupedTransactionsList extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
             child: Text(
               entry.header!,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(context).textTheme.titleSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
           );
         }
@@ -60,6 +61,7 @@ class GroupedTransactionsList extends StatelessWidget {
         return TransactionTile(
           transaction: tx,
           onTap: () => onTransactionTap(tx),
+          isHidden: isHidden,
         );
       },
     );

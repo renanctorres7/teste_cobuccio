@@ -15,6 +15,8 @@ class BalanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      elevation: 5,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -39,9 +41,8 @@ class BalanceCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               isHidden ? r'R$ ••••••' : formattedBalance,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(context).textTheme.headlineMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
           ],
         ),

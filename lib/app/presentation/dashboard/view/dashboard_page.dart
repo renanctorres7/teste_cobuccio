@@ -23,23 +23,21 @@ class DashboardPage extends StatelessWidget {
         builder: (context, state) {
           return switch (state) {
             DashboardLoading() => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              child: CircularProgressIndicator(),
+            ),
             DashboardFailure(:final failure) => AppErrorView(
-                message: failureMessage(failure),
-                onRetry: () => context.read<DashboardCubit>().load(
-                      forceRefresh: true,
-                    ),
-              ),
+              message: failureMessage(failure),
+              onRetry: () =>
+                  context.read<DashboardCubit>().load(forceRefresh: true),
+            ),
             DashboardSuccess(
               :final summary,
               :final recentTransactions,
               :final isBalanceHidden,
             ) =>
               RefreshIndicator(
-                onRefresh: () => context.read<DashboardCubit>().load(
-                      forceRefresh: true,
-                    ),
+                onRefresh: () =>
+                    context.read<DashboardCubit>().load(forceRefresh: true),
                 child: ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
@@ -59,6 +57,7 @@ class DashboardPage extends StatelessWidget {
                             value: summary.totalIncome.format(),
                             icon: Icons.arrow_downward,
                             color: Theme.of(context).colorScheme.primary,
+                            isHidden: isBalanceHidden,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -68,6 +67,7 @@ class DashboardPage extends StatelessWidget {
                             value: summary.totalExpense.format(),
                             icon: Icons.arrow_upward,
                             color: Theme.of(context).colorScheme.error,
+                            isHidden: isBalanceHidden,
                           ),
                         ),
                       ],
@@ -108,6 +108,7 @@ class DashboardPage extends StatelessWidget {
                           onTap: () => context.push(
                             AppRoutes.transactionDetailPath(tx.id),
                           ),
+                          isHidden: isBalanceHidden,
                         ),
                       ),
                     const SizedBox(height: 8),

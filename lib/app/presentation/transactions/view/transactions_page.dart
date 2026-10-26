@@ -63,21 +63,22 @@ class _TransactionsPageState extends State<TransactionsPage> {
           ),
           BlocBuilder<TransactionsCubit, TransactionsState>(
             builder: (context, state) {
-              final filters =
-                  state is TransactionsSuccess ? state.filters : null;
+              final filters = state is TransactionsSuccess
+                  ? state.filters
+                  : null;
               return TransactionsFilterBar(
                 filters: filters,
                 onTypeSelected: (type, {required clear}) {
                   context.read<TransactionsCubit>().applyFilters(
-                        type: type,
-                        clearType: clear,
-                      );
+                    type: type,
+                    clearType: clear,
+                  );
                 },
                 onStatusSelected: (status, {required clear}) {
                   context.read<TransactionsCubit>().applyFilters(
-                        status: status,
-                        clearStatus: clear,
-                      );
+                    status: status,
+                    clearStatus: clear,
+                  );
                 },
                 onPeriodPressed: () => _pickPeriod(context),
               );
@@ -89,28 +90,25 @@ class _TransactionsPageState extends State<TransactionsPage> {
               builder: (context, state) {
                 return switch (state) {
                   TransactionsLoading() => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                    child: CircularProgressIndicator(),
+                  ),
                   TransactionsFailure(:final failure) => AppErrorView(
-                      message: failureMessage(failure),
-                      onRetry: () => context.read<TransactionsCubit>().load(
-                            forceRefresh: true,
-                          ),
+                    message: failureMessage(failure),
+                    onRetry: () => context.read<TransactionsCubit>().load(
+                      forceRefresh: true,
                     ),
-                  TransactionsSuccess(
-                    :final items,
-                    :final isLoadingMore,
-                  ) =>
+                  ),
+                  TransactionsSuccess(:final items, :final isLoadingMore) =>
                     items.isEmpty
                         ? const Center(
                             child: Text('Nenhuma transação encontrada'),
                           )
                         : RefreshIndicator(
-                            onRefresh: () =>
-                                context.read<TransactionsCubit>().load(
-                                      forceRefresh: true,
-                                    ),
+                            onRefresh: () => context
+                                .read<TransactionsCubit>()
+                                .load(forceRefresh: true),
                             child: GroupedTransactionsList(
+                              isHidden: false,
                               controller: _scrollController,
                               items: items,
                               isLoadingMore: isLoadingMore,
@@ -143,19 +141,19 @@ class _TransactionsPageState extends State<TransactionsPage> {
       return;
     }
     await context.read<TransactionsCubit>().applyFilters(
-          startDate: DateTime.utc(
-            range.start.year,
-            range.start.month,
-            range.start.day,
-          ),
-          endDate: DateTime.utc(
-            range.end.year,
-            range.end.month,
-            range.end.day,
-            23,
-            59,
-            59,
-          ),
-        );
+      startDate: DateTime.utc(
+        range.start.year,
+        range.start.month,
+        range.start.day,
+      ),
+      endDate: DateTime.utc(
+        range.end.year,
+        range.end.month,
+        range.end.day,
+        23,
+        59,
+        59,
+      ),
+    );
   }
 }

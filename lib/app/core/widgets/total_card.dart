@@ -7,16 +7,20 @@ class TotalCard extends StatelessWidget {
     required this.value,
     required this.icon,
     required this.color,
+    required this.isHidden,
   });
 
   final String label;
   final String value;
   final IconData icon;
   final Color color;
+  final bool isHidden;
 
   @override
   Widget build(BuildContext context) {
     return Card(
+      elevation: 5,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -27,10 +31,9 @@ class TotalCard extends StatelessWidget {
             Text(label, style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: 4),
             Text(
-              value,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              isHidden ? r'R$ ••••••' : value,
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w600),
             ),
           ],
         ),

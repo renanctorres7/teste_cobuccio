@@ -9,10 +9,12 @@ class TransactionTile extends StatelessWidget {
     super.key,
     required this.transaction,
     this.onTap,
+    required this.isHidden,
   });
 
   final TransactionEntity transaction;
   final VoidCallback? onTap;
+  final bool isHidden;
 
   @override
   Widget build(BuildContext context) {
@@ -41,11 +43,9 @@ class TransactionTile extends StatelessWidget {
         '${transactionTypeLabel(transaction.type)}',
       ),
       trailing: Text(
-        '$prefix${transaction.amount.format()}',
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
+        isHidden ? r'R$ ••••••' : '$prefix${transaction.amount.format()}',
+        style: Theme.of(context).textTheme.titleMedium
+            ?.copyWith(color: color, fontWeight: FontWeight.w600),
       ),
     );
   }

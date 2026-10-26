@@ -19,6 +19,8 @@ class PeriodTotalsChart extends StatelessWidget {
     return SizedBox(
       height: 180,
       child: Card(
+        elevation: 5,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: BarChart(
