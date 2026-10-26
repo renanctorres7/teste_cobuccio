@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:teste_cobuccio/app/core/theme/app_theme_data.dart';
 
@@ -15,6 +16,15 @@ class AppWidget extends StatelessWidget {
       theme: buildAppTheme(),
       darkTheme: buildAppDarkTheme(),
       themeMode: ThemeMode.system,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('pt', 'BR'),
+        Locale('en', 'US'),
+      ],
       routerConfig: router,
     );
   }
