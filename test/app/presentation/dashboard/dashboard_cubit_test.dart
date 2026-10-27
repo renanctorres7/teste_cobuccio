@@ -24,6 +24,7 @@ void main() {
   DashboardCubit buildCubit({
     StubWalletSummaryRepository? wallet,
     StubListTransactionsRepository? list,
+    FakeNetworkInfo? networkInfo,
   }) {
     return DashboardCubit(
       getWalletSummaryUseCase: GetWalletSummaryUseCase(
@@ -35,6 +36,7 @@ void main() {
       ),
       snapshotProvider: snapshot,
       preferences: prefs,
+      networkInfo: networkInfo ?? FakeNetworkInfo(),
     );
   }
 
@@ -53,6 +55,14 @@ void main() {
     expect(state.recentTransactions, [sampleTransaction()]);
     expect(state.isBalanceHidden, isFalse);
     expect(state.isFromCache, isFalse);
+    expect(state.isOffline, isFalse);
+  });
+
+  test('load emits isOffline when network is offline', () async {
+    final cubit = buildCubit(networkInfo: FakeNetworkInfo(online: false));
+    await cubit.load();
+
+    expect((cubit.state as DashboardSuccess).isOffline, isTrue);
   });
 
   test('load propagates isFromCache from summary or list', () async {

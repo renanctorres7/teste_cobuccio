@@ -11,6 +11,8 @@ import 'package:teste_cobuccio/app/features/transactions/infra/models/market_cha
 import 'package:teste_cobuccio/app/features/transactions/infra/repository/financial_snapshot_provider.dart';
 import 'package:teste_cobuccio/app/features/transactions/infra/repository/list_transactions_repository_impl.dart';
 
+import '../../../../../helpers/fakes.dart';
+
 class _FakeDatasource implements CoinMarketDatasource {
   _FakeDatasource({
     this.chart,
@@ -76,6 +78,7 @@ void main() {
     final provider = FinancialSnapshotProvider(
       datasource: datasource,
       cache: TransactionsLocalCache(prefs),
+      networkInfo: FakeNetworkInfo(),
     );
     final repository = ListTransactionsRepositoryImpl(provider);
 
@@ -102,6 +105,7 @@ void main() {
     final provider = FinancialSnapshotProvider(
       datasource: datasource,
       cache: cache,
+      networkInfo: FakeNetworkInfo(),
     );
     final repository = ListTransactionsRepositoryImpl(provider);
 
@@ -123,6 +127,7 @@ void main() {
     final provider = FinancialSnapshotProvider(
       datasource: datasource,
       cache: TransactionsLocalCache(prefs),
+      networkInfo: FakeNetworkInfo(),
     );
     final repository = ListTransactionsRepositoryImpl(provider);
 

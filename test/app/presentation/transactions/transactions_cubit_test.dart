@@ -25,10 +25,14 @@ void main() {
     snapshot = unusedSnapshotProvider(TransactionsLocalCache(prefs));
   });
 
-  TransactionsCubit buildCubit(ListTransactionsRepository repo) {
+  TransactionsCubit buildCubit(
+    ListTransactionsRepository repo, {
+    FakeNetworkInfo? networkInfo,
+  }) {
     return TransactionsCubit(
       listTransactionsUseCase: ListTransactionsUseCase(repo),
       snapshotProvider: snapshot,
+      networkInfo: networkInfo ?? FakeNetworkInfo(),
     );
   }
 
@@ -49,6 +53,17 @@ void main() {
     expect(state.hasMore, isFalse);
     expect(state.filters, const TransactionFilters());
     expect(state.isFromCache, isFalse);
+    expect(state.isOffline, isFalse);
+  });
+
+  test('load emits isOffline when network is offline', () async {
+    final cubit = buildCubit(
+      StubListTransactionsRepository(items: [sampleTransaction()]),
+      networkInfo: FakeNetworkInfo(online: false),
+    );
+    await cubit.load();
+
+    expect((cubit.state as TransactionsSuccess).isOffline, isTrue);
   });
 
   test('load propagates isFromCache', () async {

@@ -37,6 +37,7 @@ void main() {
       StubGetByIdRepository(transaction: tx),
     );
 
+    final networkInfo = FakeNetworkInfo();
     final dashboardCubit = DashboardCubit(
       getWalletSummaryUseCase: GetWalletSummaryUseCase(
         StubWalletSummaryRepository(),
@@ -44,6 +45,7 @@ void main() {
       listTransactionsUseCase: listUseCase,
       snapshotProvider: snapshot,
       preferences: prefs,
+      networkInfo: networkInfo,
     );
     await dashboardCubit.load();
 
@@ -63,6 +65,7 @@ void main() {
             create: (_) => TransactionsCubit(
               listTransactionsUseCase: listUseCase,
               snapshotProvider: snapshot,
+              networkInfo: FakeNetworkInfo(),
             )..load(),
             child: const TransactionsPage(),
           ),
@@ -75,6 +78,7 @@ void main() {
                   create: (_) => TransactionDetailCubit(
                     getTransactionDetailUseCase: detailUseCase,
                     transactionId: id,
+                    networkInfo: FakeNetworkInfo(),
                   )..load(),
                   child: TransactionDetailPage(transactionId: id),
                 );

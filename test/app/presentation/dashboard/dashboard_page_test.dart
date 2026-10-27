@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:teste_cobuccio/app/core/errors/failures.dart';
+import 'package:teste_cobuccio/app/core/widgets/offline_banner.dart';
 import 'package:teste_cobuccio/app/core/widgets/stale_cache_banner.dart';
 import 'package:teste_cobuccio/app/features/dashboard/domain/usecases/get_wallet_summary_usecase.dart';
 import 'package:teste_cobuccio/app/features/transactions/data/cache/transactions_local_cache.dart';
@@ -48,6 +49,7 @@ void main() {
   DashboardCubit buildCubit({
     StubWalletSummaryRepository? wallet,
     StubListTransactionsRepository? list,
+    FakeNetworkInfo? networkInfo,
   }) {
     return DashboardCubit(
       getWalletSummaryUseCase: GetWalletSummaryUseCase(
@@ -58,6 +60,7 @@ void main() {
       ),
       snapshotProvider: unusedSnapshotProvider(TransactionsLocalCache(prefs)),
       preferences: prefs,
+      networkInfo: networkInfo ?? FakeNetworkInfo(),
     );
   }
 
@@ -139,6 +142,15 @@ void main() {
 
     expect(find.text(StaleCacheBanner.message), findsOneWidget);
     expect(find.byType(StaleCacheBanner), findsOneWidget);
+  });
+
+  testWidgets('shows offline banner when isOffline', (tester) async {
+    final cubit = buildCubit(networkInfo: FakeNetworkInfo(online: false));
+    await cubit.load();
+    await pumpPage(tester, cubit);
+
+    expect(find.text(OfflineBanner.message), findsOneWidget);
+    expect(find.byType(OfflineBanner), findsOneWidget);
   });
 
   testWidgets('exposes section headers and chart semantics', (tester) async {

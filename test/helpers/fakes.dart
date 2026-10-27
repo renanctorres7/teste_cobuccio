@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:teste_cobuccio/app/core/domain/paged_transactions.dart';
 import 'package:teste_cobuccio/app/core/domain/transaction_entity.dart';
 import 'package:teste_cobuccio/app/core/domain/transaction_filters.dart';
 import 'package:teste_cobuccio/app/core/errors/failures.dart';
 import 'package:teste_cobuccio/app/core/errors/result.dart';
+import 'package:teste_cobuccio/app/core/network/network_info.dart';
 import 'package:teste_cobuccio/app/features/dashboard/domain/entities/wallet_summary_entity.dart';
 import 'package:teste_cobuccio/app/features/dashboard/domain/repository/get_wallet_summary_repository.dart';
 import 'package:teste_cobuccio/app/features/transaction_detail/domain/repository/get_transaction_by_id_repository.dart';
@@ -15,6 +18,28 @@ import 'package:teste_cobuccio/app/features/transactions/infra/models/market_cha
 import 'package:teste_cobuccio/app/features/transactions/infra/repository/financial_snapshot_provider.dart';
 
 import 'fixtures.dart';
+
+final class FakeNetworkInfo implements NetworkInfo {
+  FakeNetworkInfo({this.online = true});
+
+  bool online;
+  final _controller = StreamController<bool>.broadcast();
+
+  @override
+  Future<bool> get isOnline async => online;
+
+  @override
+  Stream<bool> get onStatusChanged => _controller.stream;
+
+  void setOnline(bool value) {
+    online = value;
+    _controller.add(value);
+  }
+
+  void dispose() {
+    _controller.close();
+  }
+}
 
 final class StubWalletSummaryRepository implements GetWalletSummaryRepository {
   StubWalletSummaryRepository({
@@ -164,10 +189,12 @@ final class FailingDatasource implements CoinMarketDatasource {
 }
 
 FinancialSnapshotProvider unusedSnapshotProvider(
-  TransactionsLocalCache cache,
-) {
+  TransactionsLocalCache cache, {
+  NetworkInfo? networkInfo,
+}) {
   return FinancialSnapshotProvider(
     datasource: FailingDatasource(),
     cache: cache,
+    networkInfo: networkInfo ?? FakeNetworkInfo(),
   );
 }

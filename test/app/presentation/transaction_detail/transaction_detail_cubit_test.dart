@@ -8,35 +8,53 @@ import '../../../helpers/fakes.dart';
 import '../../../helpers/fixtures.dart';
 
 void main() {
-  test('starts in loading', () {
-    final cubit = TransactionDetailCubit(
+  TransactionDetailCubit buildCubit({
+    StubGetByIdRepository? repo,
+    String transactionId = 'tx-1',
+    FakeNetworkInfo? networkInfo,
+  }) {
+    return TransactionDetailCubit(
       getTransactionDetailUseCase: GetTransactionDetailUseCase(
-        StubGetByIdRepository(),
+        repo ?? StubGetByIdRepository(),
       ),
-      transactionId: 'tx-1',
+      transactionId: transactionId,
+      networkInfo: networkInfo ?? FakeNetworkInfo(),
     );
-    expect(cubit.state, isA<TransactionDetailLoading>());
+  }
+
+  test('starts in loading', () {
+    expect(buildCubit().state, isA<TransactionDetailLoading>());
   });
 
   test('load emits success', () async {
     final tx = sampleTransaction();
-    final cubit = TransactionDetailCubit(
-      getTransactionDetailUseCase: GetTransactionDetailUseCase(
-        StubGetByIdRepository(transaction: tx),
-      ),
+    final cubit = buildCubit(
+      repo: StubGetByIdRepository(transaction: tx),
       transactionId: tx.id,
     );
 
     await cubit.load();
 
     expect(cubit.state, TransactionDetailSuccess(tx));
+    expect((cubit.state as TransactionDetailSuccess).isOffline, isFalse);
+  });
+
+  test('load emits isOffline when network is offline', () async {
+    final tx = sampleTransaction();
+    final cubit = buildCubit(
+      repo: StubGetByIdRepository(transaction: tx),
+      transactionId: tx.id,
+      networkInfo: FakeNetworkInfo(online: false),
+    );
+
+    await cubit.load();
+
+    expect((cubit.state as TransactionDetailSuccess).isOffline, isTrue);
   });
 
   test('load emits failure', () async {
-    final cubit = TransactionDetailCubit(
-      getTransactionDetailUseCase: GetTransactionDetailUseCase(
-        StubGetByIdRepository(failure: const CacheFailure()),
-      ),
+    final cubit = buildCubit(
+      repo: StubGetByIdRepository(failure: const CacheFailure()),
       transactionId: 'missing',
     );
 
@@ -51,10 +69,7 @@ void main() {
 
   test('empty id fails in use case without hitting repository', () async {
     final repo = StubGetByIdRepository();
-    final cubit = TransactionDetailCubit(
-      getTransactionDetailUseCase: GetTransactionDetailUseCase(repo),
-      transactionId: '   ',
-    );
+    final cubit = buildCubit(repo: repo, transactionId: '   ');
 
     await cubit.load();
 

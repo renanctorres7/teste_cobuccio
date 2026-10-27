@@ -12,6 +12,8 @@ import 'package:teste_cobuccio/app/features/transactions/infra/models/financial_
 import 'package:teste_cobuccio/app/features/transactions/infra/models/market_chart_model.dart';
 import 'package:teste_cobuccio/app/features/transactions/infra/repository/financial_snapshot_provider.dart';
 
+import '../../../../../helpers/fakes.dart';
+
 class _ControllableDatasource implements CoinMarketDatasource {
   _ControllableDatasource({
     this.chart,
@@ -104,6 +106,7 @@ void main() {
 
   late SharedPreferences prefs;
   late _ControllableDatasource datasource;
+  late FakeNetworkInfo networkInfo;
   late FinancialSnapshotProvider provider;
 
   MarketChartModel sampleChart({double secondPrice = 120}) {
@@ -116,17 +119,26 @@ void main() {
     );
   }
 
+  FinancialSnapshotProvider buildProvider({
+    TransactionsLocalCache? cache,
+    FakeNetworkInfo? network,
+  }) {
+    return FinancialSnapshotProvider(
+      datasource: datasource,
+      cache: cache ?? TransactionsLocalCache(prefs),
+      networkInfo: network ?? networkInfo,
+    );
+  }
+
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
+    networkInfo = FakeNetworkInfo();
     datasource = _ControllableDatasource(
       chart: sampleChart(),
       price: const CoinPriceModel(coinId: 'bitcoin', price: 100),
     );
-    provider = FinancialSnapshotProvider(
-      datasource: datasource,
-      cache: TransactionsLocalCache(prefs),
-    );
+    provider = buildProvider();
   });
 
   test('coalesces concurrent getSnapshot into one network round-trip', () async {
@@ -136,6 +148,9 @@ void main() {
     final second = provider.getSnapshot();
 
     expect(identical(first, second), isTrue);
+
+    // Yield so the async online check can reach the datasource hold.
+    await Future<void>.delayed(Duration.zero);
     expect(datasource.marketChartCalls, 1);
 
     datasource.release();
@@ -160,6 +175,7 @@ void main() {
     datasource.hold();
 
     final obsolete = provider.getSnapshot();
+    await Future<void>.delayed(Duration.zero);
     expect(datasource.marketChartCalls, 1);
     final obsoleteToken = datasource.lastCancelToken;
 
@@ -168,6 +184,7 @@ void main() {
 
     final refreshed = provider.getSnapshot(forceRefresh: true);
     expect(obsoleteToken?.isCancelled, isTrue);
+    await Future<void>.delayed(Duration.zero);
     expect(datasource.marketChartCalls, 2);
 
     datasource.release();
@@ -188,6 +205,7 @@ void main() {
     datasource.hold();
 
     final inFlight = provider.getSnapshot();
+    await Future<void>.delayed(Duration.zero);
     final token = datasource.lastCancelToken;
 
     provider.clearMemory();
@@ -202,13 +220,11 @@ void main() {
   test('cancelled request does not overwrite memory with cache fallback', () async {
     final cache = TransactionsLocalCache(prefs);
     await cache.save(chart: sampleChart(), price: 50);
-    provider = FinancialSnapshotProvider(
-      datasource: datasource,
-      cache: cache,
-    );
+    provider = buildProvider(cache: cache);
 
     datasource.hold();
     final obsolete = provider.getSnapshot();
+    await Future<void>.delayed(Duration.zero);
 
     provider.clearMemory();
     datasource.release();
@@ -222,5 +238,34 @@ void main() {
     final snapshot = (next as Success<FinancialSnapshot>).data;
     expect(snapshot.balance.cents, 30000);
     expect(snapshot.isFromCache, isFalse);
+  });
+
+  test('offline with cache returns isFromCache without hitting network', () async {
+    final cache = TransactionsLocalCache(prefs);
+    await cache.save(chart: sampleChart(), price: 50);
+    networkInfo.online = false;
+    provider = buildProvider(cache: cache);
+
+    final result = await provider.getSnapshot();
+
+    expect(result.isSuccess, isTrue);
+    final snapshot = (result as Success<FinancialSnapshot>).data;
+    expect(snapshot.isFromCache, isTrue);
+    expect(snapshot.balance.cents, 5000);
+    expect(datasource.marketChartCalls, 0);
+    expect(datasource.simplePriceCalls, 0);
+  });
+
+  test('offline without cache returns NetworkFailure without hitting network',
+      () async {
+    networkInfo.online = false;
+    provider = buildProvider();
+
+    final result = await provider.getSnapshot();
+
+    expect(result.isFailure, isTrue);
+    expect((result as Error).failure, isA<NetworkFailure>());
+    expect(datasource.marketChartCalls, 0);
+    expect(datasource.simplePriceCalls, 0);
   });
 }

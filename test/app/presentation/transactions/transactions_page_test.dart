@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:teste_cobuccio/app/core/errors/failures.dart';
+import 'package:teste_cobuccio/app/core/widgets/offline_banner.dart';
 import 'package:teste_cobuccio/app/core/widgets/stale_cache_banner.dart';
 import 'package:teste_cobuccio/app/features/transactions/data/cache/transactions_local_cache.dart';
 import 'package:teste_cobuccio/app/features/transactions/domain/usecases/list_transactions_usecase.dart';
@@ -44,10 +45,14 @@ void main() {
     await tester.pump();
   }
 
-  TransactionsCubit buildCubit(StubListTransactionsRepository repo) {
+  TransactionsCubit buildCubit(
+    StubListTransactionsRepository repo, {
+    FakeNetworkInfo? networkInfo,
+  }) {
     return TransactionsCubit(
       listTransactionsUseCase: ListTransactionsUseCase(repo),
       snapshotProvider: unusedSnapshotProvider(TransactionsLocalCache(prefs)),
+      networkInfo: networkInfo ?? FakeNetworkInfo(),
     );
   }
 
@@ -121,6 +126,18 @@ void main() {
 
     expect(find.text(StaleCacheBanner.message), findsOneWidget);
     expect(find.byType(StaleCacheBanner), findsOneWidget);
+  });
+
+  testWidgets('shows offline banner when isOffline', (tester) async {
+    final cubit = buildCubit(
+      StubListTransactionsRepository(items: [sampleTransaction()]),
+      networkInfo: FakeNetworkInfo(online: false),
+    );
+    await cubit.load();
+    await pumpPage(tester, cubit);
+
+    expect(find.text(OfflineBanner.message), findsOneWidget);
+    expect(find.byType(OfflineBanner), findsOneWidget);
   });
 
   testWidgets('exposes search field label for screen readers', (tester) async {
