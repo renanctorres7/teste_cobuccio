@@ -15,69 +15,92 @@ class PeriodTotalsChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final incomeFormatted = totalIncome.format();
+    final expenseFormatted = totalExpense.format();
+    final incomeY = totalIncome.asReais.clamp(0, double.infinity).toDouble();
+    final expenseY = totalExpense.asReais.clamp(0, double.infinity).toDouble();
 
-    return SizedBox(
-      height: 180,
-      child: Card(
-        elevation: 5,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: BarChart(
-            BarChartData(
-              alignment: BarChartAlignment.spaceAround,
-              titlesData: FlTitlesData(
-                topTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                rightTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                leftTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    getTitlesWidget: (value, _) {
-                      return Text(
-                        value == 0 ? 'Entradas' : 'Saídas',
-                        style: Theme.of(context).textTheme.labelMedium,
-                      );
-                    },
+    return Semantics(
+      label: 'Entradas $incomeFormatted, Saídas $expenseFormatted',
+      container: true,
+      child: SizedBox(
+        height: 180,
+        child: Card(
+          elevation: 5,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          child: ExcludeSemantics(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: BarChart(
+                BarChartData(
+                  alignment: BarChartAlignment.spaceAround,
+                  titlesData: FlTitlesData(
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 40,
+                        getTitlesWidget: (value, meta) {
+                          final isIncome = value == 0;
+                          return SideTitleWidget(
+                            meta: meta,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  isIncome ? incomeFormatted : expenseFormatted,
+                                  style: textTheme.labelSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  isIncome ? 'Entradas' : 'Saídas',
+                                  style: textTheme.labelMedium,
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ),
+                  borderData: FlBorderData(show: false),
+                  gridData: const FlGridData(show: false),
+                  barGroups: [
+                    BarChartGroupData(
+                      x: 0,
+                      barRods: [
+                        BarChartRodData(
+                          toY: incomeY,
+                          color: colorScheme.primary,
+                          width: 28,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ],
+                    ),
+                    BarChartGroupData(
+                      x: 1,
+                      barRods: [
+                        BarChartRodData(
+                          toY: expenseY,
+                          color: colorScheme.error,
+                          width: 28,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              borderData: FlBorderData(show: false),
-              gridData: const FlGridData(show: false),
-              barGroups: [
-                BarChartGroupData(
-                  x: 0,
-                  barRods: [
-                    BarChartRodData(
-                      toY: totalIncome.asReais
-                          .clamp(0, double.infinity)
-                          .toDouble(),
-                      color: colorScheme.primary,
-                      width: 28,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ],
-                ),
-                BarChartGroupData(
-                  x: 1,
-                  barRods: [
-                    BarChartRodData(
-                      toY: totalExpense.asReais
-                          .clamp(0, double.infinity)
-                          .toDouble(),
-                      color: colorScheme.error,
-                      width: 28,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ],
-                ),
-              ],
             ),
           ),
         ),
