@@ -6,6 +6,7 @@ import 'package:teste_cobuccio/app/core/router/app_routes.dart';
 import 'package:teste_cobuccio/app/core/widgets/app_error_view.dart';
 import 'package:teste_cobuccio/app/core/widgets/app_loading_view.dart';
 import 'package:teste_cobuccio/app/core/widgets/grouped_transactions_list.dart';
+import 'package:teste_cobuccio/app/core/widgets/stale_cache_banner.dart';
 import 'package:teste_cobuccio/app/core/widgets/transactions_filter_bar.dart';
 import 'package:teste_cobuccio/app/presentation/transactions/view_model/transactions_cubit.dart';
 import 'package:teste_cobuccio/app/presentation/transactions/view_model/transactions_state.dart';
@@ -55,9 +56,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             child: TextField(
               controller: _searchController,
               decoration: const InputDecoration(
-                prefixIcon: ExcludeSemantics(
-                  child: Icon(Icons.search),
-                ),
+                prefixIcon: ExcludeSemantics(child: Icon(Icons.search)),
                 labelText: 'Buscar por descrição',
                 border: OutlineInputBorder(),
               ),
@@ -88,6 +87,21 @@ class _TransactionsPageState extends State<TransactionsPage> {
             },
           ),
           const SizedBox(height: 8),
+          BlocBuilder<TransactionsCubit, TransactionsState>(
+            buildWhen: (previous, current) {
+              final prevCached =
+                  previous is TransactionsSuccess && previous.isFromCache;
+              final currCached =
+                  current is TransactionsSuccess && current.isFromCache;
+              return prevCached != currCached;
+            },
+            builder: (context, state) {
+              if (state is TransactionsSuccess && state.isFromCache) {
+                return const StaleCacheBanner();
+              }
+              return const SizedBox.shrink();
+            },
+          ),
           Expanded(
             child: BlocBuilder<TransactionsCubit, TransactionsState>(
               builder: (context, state) {

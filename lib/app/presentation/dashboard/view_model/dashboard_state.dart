@@ -19,26 +19,31 @@ final class DashboardSuccess extends DashboardState {
     required this.summary,
     required this.recentTransactions,
     required this.isBalanceHidden,
+    this.isFromCache = false,
   });
 
   final WalletSummaryEntity summary;
   final List<TransactionEntity> recentTransactions;
   final bool isBalanceHidden;
+  final bool isFromCache;
 
   DashboardSuccess copyWith({
     WalletSummaryEntity? summary,
     List<TransactionEntity>? recentTransactions,
     bool? isBalanceHidden,
+    bool? isFromCache,
   }) {
     return DashboardSuccess(
       summary: summary ?? this.summary,
       recentTransactions: recentTransactions ?? this.recentTransactions,
       isBalanceHidden: isBalanceHidden ?? this.isBalanceHidden,
+      isFromCache: isFromCache ?? this.isFromCache,
     );
   }
 
   @override
-  List<Object?> get props => [summary, recentTransactions, isBalanceHidden];
+  List<Object?> get props =>
+      [summary, recentTransactions, isBalanceHidden, isFromCache];
 }
 
 final class DashboardFailure extends DashboardState {

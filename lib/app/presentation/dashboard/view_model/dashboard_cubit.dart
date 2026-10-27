@@ -39,6 +39,7 @@ final class DashboardCubit extends Cubit<DashboardState> {
                 summary: summary,
                 recentTransactions: page.items,
                 isBalanceHidden: isHidden,
+                isFromCache: summary.isFromCache || page.isFromCache,
               ),
             );
           },

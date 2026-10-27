@@ -21,6 +21,7 @@ final class TransactionsSuccess extends TransactionsState {
     required this.hasMore,
     this.nextCursor,
     this.isLoadingMore = false,
+    this.isFromCache = false,
   });
 
   final List<TransactionEntity> items;
@@ -28,6 +29,7 @@ final class TransactionsSuccess extends TransactionsState {
   final bool hasMore;
   final String? nextCursor;
   final bool isLoadingMore;
+  final bool isFromCache;
 
   TransactionsSuccess copyWith({
     List<TransactionEntity>? items,
@@ -35,6 +37,7 @@ final class TransactionsSuccess extends TransactionsState {
     bool? hasMore,
     String? nextCursor,
     bool? isLoadingMore,
+    bool? isFromCache,
   }) {
     return TransactionsSuccess(
       items: items ?? this.items,
@@ -42,12 +45,13 @@ final class TransactionsSuccess extends TransactionsState {
       hasMore: hasMore ?? this.hasMore,
       nextCursor: nextCursor ?? this.nextCursor,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      isFromCache: isFromCache ?? this.isFromCache,
     );
   }
 
   @override
   List<Object?> get props =>
-      [items, filters, hasMore, nextCursor, isLoadingMore];
+      [items, filters, hasMore, nextCursor, isLoadingMore, isFromCache];
 }
 
 final class TransactionsFailure extends TransactionsState {

@@ -92,6 +92,7 @@ final class TransactionsCubit extends Cubit<TransactionsState> {
             filters: _filters,
             hasMore: page.hasMore,
             nextCursor: page.nextCursor,
+            isFromCache: page.isFromCache,
           ),
         );
       },
