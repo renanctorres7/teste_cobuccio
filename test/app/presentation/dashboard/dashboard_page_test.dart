@@ -92,5 +92,17 @@ void main() {
     expect(find.text('Dashboard'), findsOneWidget);
     expect(find.text('Saldo disponível'), findsOneWidget);
     expect(find.text('Ver extrato'), findsOneWidget);
+
+    final legend = find.text(
+      'Entradas usam seta para baixo · Saídas usam seta para cima',
+    );
+    await tester.scrollUntilVisible(
+      legend,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(legend, findsOneWidget);
+    expect(find.textContaining('income'), findsNothing);
+    expect(find.textContaining('expense'), findsNothing);
   });
 }
