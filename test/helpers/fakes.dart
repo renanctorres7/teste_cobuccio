@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:teste_cobuccio/app/core/domain/paged_transactions.dart';
 import 'package:teste_cobuccio/app/core/domain/transaction_entity.dart';
 import 'package:teste_cobuccio/app/core/domain/transaction_filters.dart';
@@ -147,6 +148,7 @@ final class FailingDatasource implements CoinMarketDatasource {
     required String coinId,
     required String vsCurrency,
     required int days,
+    CancelToken? cancelToken,
   }) {
     throw Exception('not used');
   }
@@ -155,6 +157,7 @@ final class FailingDatasource implements CoinMarketDatasource {
   Future<CoinPriceModel> getSimplePrice({
     required String coinId,
     required String vsCurrency,
+    CancelToken? cancelToken,
   }) {
     throw Exception('not used');
   }

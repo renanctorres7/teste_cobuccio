@@ -27,6 +27,7 @@ class _FakeDatasource implements CoinMarketDatasource {
     required String coinId,
     required String vsCurrency,
     required int days,
+    CancelToken? cancelToken,
   }) async {
     if (error != null) {
       throw error!;
@@ -38,6 +39,7 @@ class _FakeDatasource implements CoinMarketDatasource {
   Future<CoinPriceModel> getSimplePrice({
     required String coinId,
     required String vsCurrency,
+    CancelToken? cancelToken,
   }) async {
     if (error != null) {
       throw error!;
