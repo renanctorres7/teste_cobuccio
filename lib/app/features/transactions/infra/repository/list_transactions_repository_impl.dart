@@ -34,6 +34,7 @@ final class ListTransactionsRepositoryImpl
             items: page,
             nextCursor: hasMore ? '$end' : null,
             hasMore: hasMore,
+            isFromCache: snapshot.isFromCache,
           ),
         );
       },

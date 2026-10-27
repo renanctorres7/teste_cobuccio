@@ -6,12 +6,14 @@ final class PagedTransactions extends Equatable {
     required this.items,
     this.nextCursor,
     this.hasMore = false,
+    this.isFromCache = false,
   });
 
   final List<TransactionEntity> items;
   final String? nextCursor;
   final bool hasMore;
+  final bool isFromCache;
 
   @override
-  List<Object?> get props => [items, nextCursor, hasMore];
+  List<Object?> get props => [items, nextCursor, hasMore, isFromCache];
 }

@@ -28,6 +28,7 @@ final class GetWalletSummaryRepositoryImpl
             availableBalance: snapshot.balance,
             totalIncome: totals.totalIncome,
             totalExpense: totals.totalExpense,
+            isFromCache: snapshot.isFromCache,
           ),
         );
       },

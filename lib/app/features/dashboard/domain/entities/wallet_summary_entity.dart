@@ -6,12 +6,15 @@ final class WalletSummaryEntity extends Equatable {
     required this.availableBalance,
     required this.totalIncome,
     required this.totalExpense,
+    this.isFromCache = false,
   });
 
   final Money availableBalance;
   final Money totalIncome;
   final Money totalExpense;
+  final bool isFromCache;
 
   @override
-  List<Object?> get props => [availableBalance, totalIncome, totalExpense];
+  List<Object?> get props =>
+      [availableBalance, totalIncome, totalExpense, isFromCache];
 }
