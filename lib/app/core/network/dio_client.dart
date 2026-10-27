@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:teste_cobuccio/app/core/configs/env_keys.dart';
+import 'package:teste_cobuccio/app/core/network/retry_interceptor.dart';
 
 abstract final class DioClient {
   static Dio create() {
@@ -18,7 +19,7 @@ abstract final class DioClient {
       headers['x-cg-demo-api-key'] = apiKey;
     }
 
-    return Dio(
+    final dio = Dio(
       BaseOptions(
         baseUrl: _resolveBaseUrl(baseUrlRaw),
         connectTimeout: const Duration(seconds: 15),
@@ -27,6 +28,8 @@ abstract final class DioClient {
         headers: headers,
       ),
     );
+    dio.interceptors.add(RetryInterceptor(dio: dio));
+    return dio;
   }
 
   static String _resolveBaseUrl(String raw) {
