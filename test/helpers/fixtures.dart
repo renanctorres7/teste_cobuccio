@@ -29,3 +29,10 @@ const sampleSummary = WalletSummaryEntity(
   totalIncome: Money(5000),
   totalExpense: Money(2000),
 );
+
+const sampleCachedSummary = WalletSummaryEntity(
+  availableBalance: Money(10000),
+  totalIncome: Money(5000),
+  totalExpense: Money(2000),
+  isFromCache: true,
+);

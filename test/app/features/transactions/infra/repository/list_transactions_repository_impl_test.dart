@@ -84,6 +84,7 @@ void main() {
     expect(page.items, hasLength(2));
     expect(page.items.first.type, TransactionTypeEnum.expense);
     expect(page.hasMore, isFalse);
+    expect(page.isFromCache, isFalse);
   });
 
   test('falls back to cache when network fails', () async {
@@ -107,6 +108,7 @@ void main() {
     expect(result.isSuccess, isTrue);
     final page = (result as Success).data;
     expect(page.items, isNotEmpty);
+    expect(page.isFromCache, isTrue);
   });
 
   test('returns failure when network fails and cache is empty', () async {

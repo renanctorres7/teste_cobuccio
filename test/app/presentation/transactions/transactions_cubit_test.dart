@@ -48,6 +48,19 @@ void main() {
     expect(state.items, [tx]);
     expect(state.hasMore, isFalse);
     expect(state.filters, const TransactionFilters());
+    expect(state.isFromCache, isFalse);
+  });
+
+  test('load propagates isFromCache', () async {
+    final cubit = buildCubit(
+      StubListTransactionsRepository(
+        items: [sampleTransaction()],
+        isFromCache: true,
+      ),
+    );
+    await cubit.load();
+
+    expect((cubit.state as TransactionsSuccess).isFromCache, isTrue);
   });
 
   test('load emits empty success', () async {

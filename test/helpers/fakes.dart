@@ -45,12 +45,14 @@ final class StubListTransactionsRepository
     this.failure,
     this.hasMore = false,
     this.nextCursor,
+    this.isFromCache = false,
   });
 
   List<TransactionEntity> items;
   Failure? failure;
   bool hasMore;
   String? nextCursor;
+  bool isFromCache;
   TransactionFilters? lastFilters;
   String? lastCursor;
   int? lastLimit;
@@ -74,6 +76,7 @@ final class StubListTransactionsRepository
         items: items,
         hasMore: hasMore,
         nextCursor: nextCursor,
+        isFromCache: isFromCache,
       ),
     );
   }

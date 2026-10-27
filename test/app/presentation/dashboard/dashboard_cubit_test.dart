@@ -52,6 +52,21 @@ void main() {
     expect(state.summary, sampleSummary);
     expect(state.recentTransactions, [sampleTransaction()]);
     expect(state.isBalanceHidden, isFalse);
+    expect(state.isFromCache, isFalse);
+  });
+
+  test('load propagates isFromCache from summary or list', () async {
+    final cubit = buildCubit(
+      wallet: StubWalletSummaryRepository(summary: sampleCachedSummary),
+      list: StubListTransactionsRepository(
+        items: [sampleTransaction()],
+        isFromCache: true,
+      ),
+    );
+    await cubit.load();
+
+    final state = cubit.state as DashboardSuccess;
+    expect(state.isFromCache, isTrue);
   });
 
   test('load emits empty recent list on success', () async {

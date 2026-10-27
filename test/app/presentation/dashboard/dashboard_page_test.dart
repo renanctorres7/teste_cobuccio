@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:teste_cobuccio/app/core/errors/failures.dart';
+import 'package:teste_cobuccio/app/core/widgets/stale_cache_banner.dart';
 import 'package:teste_cobuccio/app/features/dashboard/domain/usecases/get_wallet_summary_usecase.dart';
 import 'package:teste_cobuccio/app/features/transactions/data/cache/transactions_local_cache.dart';
 import 'package:teste_cobuccio/app/features/transactions/domain/usecases/list_transactions_usecase.dart';
@@ -20,9 +21,21 @@ void main() {
     prefs = await SharedPreferences.getInstance();
   });
 
-  Future<void> pumpPage(WidgetTester tester, DashboardCubit cubit) async {
+  Future<void> pumpPage(
+    WidgetTester tester,
+    DashboardCubit cubit, {
+    double textScale = 1,
+  }) async {
     await tester.pumpWidget(
       MaterialApp(
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: TextScaler.linear(textScale),
+            ),
+            child: child!,
+          );
+        },
         home: BlocProvider.value(
           value: cubit,
           child: const DashboardPage(),
@@ -49,8 +62,12 @@ void main() {
   }
 
   testWidgets('shows loading indicator', (tester) async {
+    final handle = tester.ensureSemantics();
+
     await pumpPage(tester, buildCubit());
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.bySemanticsLabel('Carregando'), findsOneWidget);
+    handle.dispose();
   });
 
   testWidgets('shows empty recent transactions', (tester) async {
@@ -92,6 +109,7 @@ void main() {
     expect(find.text('Dashboard'), findsOneWidget);
     expect(find.text('Saldo disponível'), findsOneWidget);
     expect(find.text('Ver extrato'), findsOneWidget);
+    expect(find.text(StaleCacheBanner.message), findsNothing);
 
     final legend = find.text(
       'Entradas usam seta para baixo · Saídas usam seta para cima',
@@ -104,5 +122,65 @@ void main() {
     expect(legend, findsOneWidget);
     expect(find.textContaining('income'), findsNothing);
     expect(find.textContaining('expense'), findsNothing);
+  });
+
+  testWidgets('shows stale cache banner when data is from cache', (
+    tester,
+  ) async {
+    final cubit = buildCubit(
+      wallet: StubWalletSummaryRepository(summary: sampleCachedSummary),
+      list: StubListTransactionsRepository(
+        items: [sampleTransaction()],
+        isFromCache: true,
+      ),
+    );
+    await cubit.load();
+    await pumpPage(tester, cubit);
+
+    expect(find.text(StaleCacheBanner.message), findsOneWidget);
+    expect(find.byType(StaleCacheBanner), findsOneWidget);
+  });
+
+  testWidgets('exposes section headers and chart semantics', (tester) async {
+    final handle = tester.ensureSemantics();
+
+    final cubit = buildCubit();
+    await cubit.load();
+    await pumpPage(tester, cubit);
+
+    expect(
+      tester.getSemantics(find.text('Evolução do período')),
+      containsSemantics(label: 'Evolução do período', isHeader: true),
+    );
+    expect(
+      tester.getSemantics(find.text('Recentes')),
+      containsSemantics(label: 'Recentes', isHeader: true),
+    );
+    expect(
+      find.bySemanticsLabel(
+        'Entradas ${sampleSummary.totalIncome.format()}, '
+        'Saídas ${sampleSummary.totalExpense.format()}',
+      ),
+      findsOneWidget,
+    );
+    handle.dispose();
+  });
+
+  testWidgets('renders success layout at 200% text scale', (tester) async {
+    final cubit = buildCubit();
+    await cubit.load();
+    await pumpPage(tester, cubit, textScale: 2);
+
+    expect(find.text('Dashboard'), findsOneWidget);
+    expect(find.text('Saldo disponível'), findsOneWidget);
+    expect(find.text('Evolução do período'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Recentes'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Recentes'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }
