@@ -16,6 +16,9 @@ class PeriodTotalsChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final textScaler = MediaQuery.textScalerOf(context);
+    final chartHeight = textScaler.scale(180);
+    final bottomReserved = textScaler.scale(48);
     final incomeFormatted = totalIncome.format();
     final expenseFormatted = totalExpense.format();
     final incomeY = totalIncome.asReais.clamp(0, double.infinity).toDouble();
@@ -25,7 +28,7 @@ class PeriodTotalsChart extends StatelessWidget {
       label: 'Entradas $incomeFormatted, Saídas $expenseFormatted',
       container: true,
       child: SizedBox(
-        height: 180,
+        height: chartHeight,
         child: Card(
           elevation: 5,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
@@ -48,25 +51,30 @@ class PeriodTotalsChart extends StatelessWidget {
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
-                        reservedSize: 40,
+                        reservedSize: bottomReserved,
                         getTitlesWidget: (value, meta) {
                           final isIncome = value == 0;
                           return SideTitleWidget(
                             meta: meta,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  isIncome ? incomeFormatted : expenseFormatted,
-                                  style: textTheme.labelSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    isIncome
+                                        ? incomeFormatted
+                                        : expenseFormatted,
+                                    style: textTheme.labelSmall?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  isIncome ? 'Entradas' : 'Saídas',
-                                  style: textTheme.labelMedium,
-                                ),
-                              ],
+                                  Text(
+                                    isIncome ? 'Entradas' : 'Saídas',
+                                    style: textTheme.labelMedium,
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         },

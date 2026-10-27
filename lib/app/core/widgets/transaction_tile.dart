@@ -40,10 +40,18 @@ class TransactionTile extends StatelessWidget {
         '$date · ${transactionStatusLabel(transaction.status)} · '
         '${transactionTypeLabel(transaction.type)}',
       ),
-      trailing: Text(
-        isHidden ? r'R$ ••••••' : '$prefix${transaction.amount.format()}',
-        style: Theme.of(context).textTheme.titleMedium
-            ?.copyWith(color: color, fontWeight: FontWeight.w600),
+      trailing: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.sizeOf(context).width * 0.35,
+        ),
+        child: Text(
+          isHidden ? r'R$ ••••••' : '$prefix${transaction.amount.format()}',
+          textAlign: TextAlign.end,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.titleMedium
+              ?.copyWith(color: color, fontWeight: FontWeight.w600),
+        ),
       ),
     );
   }
