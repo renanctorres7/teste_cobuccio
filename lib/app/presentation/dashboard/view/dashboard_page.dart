@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:teste_cobuccio/app/core/domain/transaction_type_enum.dart';
 import 'package:teste_cobuccio/app/core/errors/failure_message.dart';
 import 'package:teste_cobuccio/app/core/router/app_routes.dart';
 import 'package:teste_cobuccio/app/core/widgets/app_error_view.dart';
@@ -72,9 +71,12 @@ class DashboardPage extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    Text(
-                      'Evolução do período',
-                      style: Theme.of(context).textTheme.titleMedium,
+                    Semantics(
+                      header: true,
+                      child: Text(
+                        'Evolução do período',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     PeriodTotalsChart(
@@ -84,9 +86,12 @@ class DashboardPage extends StatelessWidget {
                     const SizedBox(height: 16),
                     Row(
                       children: [
-                        Text(
-                          'Recentes',
-                          style: Theme.of(context).textTheme.titleMedium,
+                        Semantics(
+                          header: true,
+                          child: Text(
+                            'Recentes',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
                         ),
                         const Spacer(),
                         TextButton(
@@ -116,12 +121,12 @@ class DashboardPage extends StatelessWidget {
                         ),
                       ),
                     const SizedBox(height: 8),
-                    Semantics(
-                      label: 'Legenda de tipos de movimentação',
+                    ExcludeSemantics(
                       child: Text(
-                        'Entradas usam seta para baixo · Saídas usam seta para cima '
-                        '(${TransactionTypeEnum.income.name}/${TransactionTypeEnum.expense.name})',
-                        style: Theme.of(context).textTheme.bodySmall,
+                        'Entradas usam seta para baixo · Saídas usam seta para cima',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   ],

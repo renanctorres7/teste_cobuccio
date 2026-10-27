@@ -76,9 +76,12 @@ class TransactionDetailPage extends StatelessWidget {
                   ),
                   if (transaction.metadata.isNotEmpty) ...[
                     const SizedBox(height: 12),
-                    Text(
-                      'Metadados',
-                      style: Theme.of(context).textTheme.titleMedium,
+                    Semantics(
+                      header: true,
+                      child: Text(
+                        'Metadados',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     ...transaction.metadata.entries.map(

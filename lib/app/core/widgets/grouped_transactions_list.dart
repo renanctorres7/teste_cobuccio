@@ -57,10 +57,13 @@ class GroupedTransactionsList extends StatelessWidget {
         if (entry.header != null) {
           return Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-            child: Text(
-              entry.header!,
-              style: Theme.of(context).textTheme.titleSmall
-                  ?.copyWith(fontWeight: FontWeight.bold),
+            child: Semantics(
+              header: true,
+              child: Text(
+                entry.header!,
+                style: Theme.of(context).textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
             ),
           );
         }
