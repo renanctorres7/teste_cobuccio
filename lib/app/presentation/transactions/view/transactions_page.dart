@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:teste_cobuccio/app/core/errors/failure_message.dart';
 import 'package:teste_cobuccio/app/core/router/app_routes.dart';
 import 'package:teste_cobuccio/app/core/widgets/app_error_view.dart';
+import 'package:teste_cobuccio/app/core/widgets/app_loading_view.dart';
 import 'package:teste_cobuccio/app/core/widgets/grouped_transactions_list.dart';
 import 'package:teste_cobuccio/app/core/widgets/transactions_filter_bar.dart';
 import 'package:teste_cobuccio/app/presentation/transactions/view_model/transactions_cubit.dart';
@@ -54,8 +55,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
             child: TextField(
               controller: _searchController,
               decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search),
-                hintText: 'Buscar por descrição',
+                prefixIcon: ExcludeSemantics(
+                  child: Icon(Icons.search),
+                ),
+                labelText: 'Buscar por descrição',
                 border: OutlineInputBorder(),
               ),
               onChanged: context.read<TransactionsCubit>().onQueryChanged,
@@ -89,9 +92,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             child: BlocBuilder<TransactionsCubit, TransactionsState>(
               builder: (context, state) {
                 return switch (state) {
-                  TransactionsLoading() => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                  TransactionsLoading() => const AppLoadingView(),
                   TransactionsFailure(:final failure) => AppErrorView(
                     message: failureMessage(failure),
                     onRetry: () => context.read<TransactionsCubit>().load(
@@ -100,8 +101,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   ),
                   TransactionsSuccess(:final items, :final isLoadingMore) =>
                     items.isEmpty
-                        ? const Center(
-                            child: Text('Nenhuma transação encontrada'),
+                        ? Semantics(
+                            liveRegion: true,
+                            child: const Center(
+                              child: Text('Nenhuma transação encontrada'),
+                            ),
                           )
                         : RefreshIndicator(
                             onRefresh: () => context

@@ -26,7 +26,9 @@ class TotalCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: color, semanticLabel: label),
+            ExcludeSemantics(
+              child: Icon(icon, color: color),
+            ),
             const SizedBox(height: 8),
             Text(label, style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: 4),

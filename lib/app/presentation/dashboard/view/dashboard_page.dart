@@ -5,6 +5,7 @@ import 'package:teste_cobuccio/app/core/domain/transaction_type_enum.dart';
 import 'package:teste_cobuccio/app/core/errors/failure_message.dart';
 import 'package:teste_cobuccio/app/core/router/app_routes.dart';
 import 'package:teste_cobuccio/app/core/widgets/app_error_view.dart';
+import 'package:teste_cobuccio/app/core/widgets/app_loading_view.dart';
 import 'package:teste_cobuccio/app/core/widgets/balance_card.dart';
 import 'package:teste_cobuccio/app/core/widgets/period_totals_chart.dart';
 import 'package:teste_cobuccio/app/core/widgets/total_card.dart';
@@ -22,9 +23,7 @@ class DashboardPage extends StatelessWidget {
       body: BlocBuilder<DashboardCubit, DashboardState>(
         builder: (context, state) {
           return switch (state) {
-            DashboardLoading() => const Center(
-              child: CircularProgressIndicator(),
-            ),
+            DashboardLoading() => const AppLoadingView(),
             DashboardFailure(:final failure) => AppErrorView(
               message: failureMessage(failure),
               onRetry: () =>
@@ -97,9 +96,14 @@ class DashboardPage extends StatelessWidget {
                       ],
                     ),
                     if (recentTransactions.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 24),
-                        child: Center(child: Text('Nenhuma transação recente')),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Semantics(
+                          liveRegion: true,
+                          child: const Center(
+                            child: Text('Nenhuma transação recente'),
+                          ),
+                        ),
                       )
                     else
                       ...recentTransactions.map(

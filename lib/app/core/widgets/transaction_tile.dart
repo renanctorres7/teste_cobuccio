@@ -29,12 +29,10 @@ class TransactionTile extends StatelessWidget {
 
     return ListTile(
       onTap: onTap,
-      leading: CircleAvatar(
-        backgroundColor: color.withValues(alpha: 0.15),
-        child: Icon(
-          icon,
-          color: color,
-          semanticLabel: transactionTypeLabel(transaction.type),
+      leading: ExcludeSemantics(
+        child: CircleAvatar(
+          backgroundColor: color.withValues(alpha: 0.15),
+          child: Icon(icon, color: color),
         ),
       ),
       title: Text(transaction.description),

@@ -39,9 +39,17 @@ class GroupedTransactionsList extends StatelessWidget {
       itemCount: entries.length + (isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index >= entries.length) {
-          return const Padding(
-            padding: EdgeInsets.all(16),
-            child: Center(child: CircularProgressIndicator()),
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Semantics(
+              liveRegion: true,
+              label: 'Carregando mais itens',
+              child: const Center(
+                child: ExcludeSemantics(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            ),
           );
         }
 

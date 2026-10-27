@@ -6,6 +6,7 @@ import 'package:teste_cobuccio/app/core/domain/transaction_labels.dart';
 import 'package:teste_cobuccio/app/core/domain/transaction_type_enum.dart';
 import 'package:teste_cobuccio/app/core/errors/failure_message.dart';
 import 'package:teste_cobuccio/app/core/widgets/app_error_view.dart';
+import 'package:teste_cobuccio/app/core/widgets/app_loading_view.dart';
 import 'package:teste_cobuccio/app/core/widgets/detail_row.dart';
 import 'package:teste_cobuccio/app/presentation/transaction_detail/view_model/transaction_detail_cubit.dart';
 import 'package:teste_cobuccio/app/presentation/transaction_detail/view_model/transaction_detail_state.dart';
@@ -22,9 +23,7 @@ class TransactionDetailPage extends StatelessWidget {
       body: BlocBuilder<TransactionDetailCubit, TransactionDetailState>(
         builder: (context, state) {
           return switch (state) {
-            TransactionDetailLoading() => const Center(
-                child: CircularProgressIndicator(),
-              ),
+            TransactionDetailLoading() => const AppLoadingView(),
             TransactionDetailFailure(:final failure) => AppErrorView(
                 message: failureMessage(failure),
                 onRetry: () => context.read<TransactionDetailCubit>().load(),
