@@ -9,6 +9,7 @@ final class CoinGeckoService {
     required String coinId,
     required String vsCurrency,
     required int days,
+    CancelToken? cancelToken,
   }) {
     return _dio.get<dynamic>(
       '/coins/$coinId/market_chart',
@@ -16,12 +17,14 @@ final class CoinGeckoService {
         'vs_currency': vsCurrency,
         'days': days,
       },
+      cancelToken: cancelToken,
     );
   }
 
   Future<Response<dynamic>> getSimplePrice({
     required String coinId,
     required String vsCurrency,
+    CancelToken? cancelToken,
   }) {
     return _dio.get<dynamic>(
       '/simple/price',
@@ -29,6 +32,7 @@ final class CoinGeckoService {
         'ids': coinId,
         'vs_currencies': vsCurrency,
       },
+      cancelToken: cancelToken,
     );
   }
 }
