@@ -7,21 +7,14 @@ void main() {
     final handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: StaleCacheBanner(),
-        ),
-      ),
+      const MaterialApp(home: Scaffold(body: StaleCacheBanner())),
     );
 
     final message = find.text(StaleCacheBanner.message);
     expect(message, findsOneWidget);
     expect(
       tester.getSemantics(message),
-      containsSemantics(
-        label: StaleCacheBanner.message,
-        isLiveRegion: true,
-      ),
+      isSemantics(label: StaleCacheBanner.message, isLiveRegion: true),
     );
     expect(find.byIcon(Icons.info_outline), findsOneWidget);
     handle.dispose();

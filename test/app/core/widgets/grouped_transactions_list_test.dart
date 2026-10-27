@@ -32,15 +32,12 @@ void main() {
 
     expect(
       tester.getSemantics(find.text(header)),
-      containsSemantics(label: header, isHeader: true),
+      isSemantics(label: header, isHeader: true),
     );
     expect(find.bySemanticsLabel('Carregando mais itens'), findsOneWidget);
     expect(
       tester.getSemantics(find.bySemanticsLabel('Carregando mais itens')),
-      containsSemantics(
-        label: 'Carregando mais itens',
-        isLiveRegion: true,
-      ),
+      isSemantics(label: 'Carregando mais itens', isLiveRegion: true),
     );
     handle.dispose();
   });

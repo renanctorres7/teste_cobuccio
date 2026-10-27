@@ -23,7 +23,7 @@ void main() {
     expect(message, findsOneWidget);
     expect(
       tester.getSemantics(message),
-      containsSemantics(
+      isSemantics(
         label: 'Sem conexão. Verifique a internet e tente novamente.',
         isLiveRegion: true,
       ),

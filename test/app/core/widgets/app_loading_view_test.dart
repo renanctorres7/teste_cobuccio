@@ -7,18 +7,13 @@ void main() {
     final handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(body: AppLoadingView()),
-      ),
+      const MaterialApp(home: Scaffold(body: AppLoadingView())),
     );
 
     expect(find.bySemanticsLabel('Carregando'), findsOneWidget);
     expect(
       tester.getSemantics(find.bySemanticsLabel('Carregando')),
-      containsSemantics(
-        label: 'Carregando',
-        isLiveRegion: true,
-      ),
+      isSemantics(label: 'Carregando', isLiveRegion: true),
     );
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     handle.dispose();
@@ -29,9 +24,7 @@ void main() {
 
     await tester.pumpWidget(
       const MaterialApp(
-        home: Scaffold(
-          body: AppLoadingView(label: 'Carregando extrato'),
-        ),
+        home: Scaffold(body: AppLoadingView(label: 'Carregando extrato')),
       ),
     );
 

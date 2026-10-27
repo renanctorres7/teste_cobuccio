@@ -30,16 +30,12 @@ void main() {
       MaterialApp(
         builder: (context, child) {
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              textScaler: TextScaler.linear(textScale),
-            ),
+            data: MediaQuery.of(context)
+                .copyWith(textScaler: TextScaler.linear(textScale)),
             child: child!,
           );
         },
-        home: BlocProvider.value(
-          value: cubit,
-          child: const TransactionsPage(),
-        ),
+        home: BlocProvider.value(value: cubit, child: const TransactionsPage()),
       ),
     );
     await tester.pump();
@@ -77,19 +73,14 @@ void main() {
     expect(empty, findsOneWidget);
     expect(
       tester.getSemantics(empty),
-      containsSemantics(
-        label: 'Nenhuma transação encontrada',
-        isLiveRegion: true,
-      ),
+      isSemantics(label: 'Nenhuma transação encontrada', isLiveRegion: true),
     );
     handle.dispose();
   });
 
   testWidgets('shows error with retry', (tester) async {
     final cubit = buildCubit(
-      StubListTransactionsRepository(
-        failure: const RateLimitFailure(),
-      ),
+      StubListTransactionsRepository(failure: const RateLimitFailure()),
     );
     await cubit.load();
     await pumpPage(tester, cubit);

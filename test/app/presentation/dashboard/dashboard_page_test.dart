@@ -31,16 +31,12 @@ void main() {
       MaterialApp(
         builder: (context, child) {
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              textScaler: TextScaler.linear(textScale),
-            ),
+            data: MediaQuery.of(context)
+                .copyWith(textScaler: TextScaler.linear(textScale)),
             child: child!,
           );
         },
-        home: BlocProvider.value(
-          value: cubit,
-          child: const DashboardPage(),
-        ),
+        home: BlocProvider.value(value: cubit, child: const DashboardPage()),
       ),
     );
     await tester.pump();
@@ -162,11 +158,11 @@ void main() {
 
     expect(
       tester.getSemantics(find.text('Evolução do período')),
-      containsSemantics(label: 'Evolução do período', isHeader: true),
+      isSemantics(label: 'Evolução do período', isHeader: true),
     );
     expect(
       tester.getSemantics(find.text('Recentes')),
-      containsSemantics(label: 'Recentes', isHeader: true),
+      isSemantics(label: 'Recentes', isHeader: true),
     );
     expect(
       find.bySemanticsLabel(
