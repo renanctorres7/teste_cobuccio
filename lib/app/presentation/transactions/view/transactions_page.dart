@@ -6,6 +6,7 @@ import 'package:teste_cobuccio/app/core/router/app_routes.dart';
 import 'package:teste_cobuccio/app/core/widgets/app_error_view.dart';
 import 'package:teste_cobuccio/app/core/widgets/app_loading_view.dart';
 import 'package:teste_cobuccio/app/core/widgets/grouped_transactions_list.dart';
+import 'package:teste_cobuccio/app/core/widgets/offline_banner.dart';
 import 'package:teste_cobuccio/app/core/widgets/stale_cache_banner.dart';
 import 'package:teste_cobuccio/app/core/widgets/transactions_filter_bar.dart';
 import 'package:teste_cobuccio/app/presentation/transactions/view_model/transactions_cubit.dart';
@@ -89,17 +90,27 @@ class _TransactionsPageState extends State<TransactionsPage> {
           const SizedBox(height: 8),
           BlocBuilder<TransactionsCubit, TransactionsState>(
             buildWhen: (previous, current) {
+              final prevOffline =
+                  previous is TransactionsSuccess && previous.isOffline;
+              final currOffline =
+                  current is TransactionsSuccess && current.isOffline;
               final prevCached =
                   previous is TransactionsSuccess && previous.isFromCache;
               final currCached =
                   current is TransactionsSuccess && current.isFromCache;
-              return prevCached != currCached;
+              return prevOffline != currOffline || prevCached != currCached;
             },
             builder: (context, state) {
-              if (state is TransactionsSuccess && state.isFromCache) {
-                return const StaleCacheBanner();
+              if (state is! TransactionsSuccess) {
+                return const SizedBox.shrink();
               }
-              return const SizedBox.shrink();
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (state.isOffline) const OfflineBanner(),
+                  if (state.isFromCache) const StaleCacheBanner(),
+                ],
+              );
             },
           ),
           Expanded(

@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
+import 'package:teste_cobuccio/app/core/errors/failures.dart';
 import 'package:teste_cobuccio/app/core/errors/result.dart';
 import 'package:teste_cobuccio/app/core/network/dio_exception_mapper.dart';
+import 'package:teste_cobuccio/app/core/network/network_info.dart';
 import 'package:teste_cobuccio/app/features/transactions/data/cache/transactions_local_cache.dart';
 import 'package:teste_cobuccio/app/features/transactions/infra/datasources/coin_market_datasource.dart';
 import 'package:teste_cobuccio/app/features/transactions/infra/mappers/coin_market_mapper.dart';
@@ -10,6 +12,7 @@ final class FinancialSnapshotProvider {
   FinancialSnapshotProvider({
     required this._datasource,
     required this._cache,
+    required this._networkInfo,
     this.coinId = 'bitcoin',
     this.vsCurrency = 'brl',
     this.days = 30,
@@ -17,6 +20,7 @@ final class FinancialSnapshotProvider {
 
   final CoinMarketDatasource _datasource;
   final TransactionsLocalCache _cache;
+  final NetworkInfo _networkInfo;
   final String coinId;
   final String vsCurrency;
   final int days;
@@ -48,6 +52,11 @@ final class FinancialSnapshotProvider {
 
   Future<Result<FinancialSnapshot>> _load(CancelToken token) async {
     try {
+      final online = await _networkInfo.isOnline;
+      if (!online) {
+        return _fromCacheOrNetworkFailure();
+      }
+
       final chart = await _datasource.getMarketChart(
         coinId: coinId,
         vsCurrency: vsCurrency,
@@ -84,18 +93,9 @@ final class FinancialSnapshotProvider {
         return Error(DioExceptionMapper.map(error));
       }
 
-      final cached = _cache.read();
+      final cached = _cacheFallback();
       if (cached != null) {
-        final snapshot = FinancialSnapshot(
-          balance: CoinMarketMapper.balanceFromPrice(cached.price),
-          transactions: CoinMarketMapper.fromMarketChart(
-            cached.chart,
-            coinId: coinId,
-          ),
-          isFromCache: true,
-        );
-        _memory = snapshot;
-        return Success(snapshot);
+        return Success(cached);
       }
 
       return Error(DioExceptionMapper.map(error));
@@ -105,6 +105,31 @@ final class FinancialSnapshotProvider {
         _cancelToken = null;
       }
     }
+  }
+
+  Result<FinancialSnapshot> _fromCacheOrNetworkFailure() {
+    final cached = _cacheFallback();
+    if (cached != null) {
+      return Success(cached);
+    }
+    return const Error(NetworkFailure());
+  }
+
+  FinancialSnapshot? _cacheFallback() {
+    final cached = _cache.read();
+    if (cached == null) {
+      return null;
+    }
+    final snapshot = FinancialSnapshot(
+      balance: CoinMarketMapper.balanceFromPrice(cached.price),
+      transactions: CoinMarketMapper.fromMarketChart(
+        cached.chart,
+        coinId: coinId,
+      ),
+      isFromCache: true,
+    );
+    _memory = snapshot;
+    return snapshot;
   }
 
   /// Clears memory and cancels any in-flight network request (e.g. forceRefresh).

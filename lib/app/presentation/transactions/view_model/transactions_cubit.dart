@@ -5,6 +5,7 @@ import 'package:teste_cobuccio/app/core/domain/transaction_entity.dart';
 import 'package:teste_cobuccio/app/core/domain/transaction_filters.dart';
 import 'package:teste_cobuccio/app/core/domain/transaction_status_enum.dart';
 import 'package:teste_cobuccio/app/core/domain/transaction_type_enum.dart';
+import 'package:teste_cobuccio/app/core/network/network_info.dart';
 import 'package:teste_cobuccio/app/features/transactions/domain/usecases/list_transactions_usecase.dart';
 import 'package:teste_cobuccio/app/features/transactions/infra/repository/financial_snapshot_provider.dart';
 import 'package:teste_cobuccio/app/presentation/transactions/view_model/transactions_state.dart';
@@ -13,19 +14,26 @@ final class TransactionsCubit extends Cubit<TransactionsState> {
   TransactionsCubit({
     required this._listTransactionsUseCase,
     required this._snapshotProvider,
-  }) : super(const TransactionsLoading());
+    required this._networkInfo,
+  }) : super(const TransactionsLoading()) {
+    _connectivitySub = _networkInfo.onStatusChanged.listen(_onConnectivity);
+  }
 
   final ListTransactionsUseCase _listTransactionsUseCase;
   final FinancialSnapshotProvider _snapshotProvider;
+  final NetworkInfo _networkInfo;
 
   TransactionFilters _filters = const TransactionFilters();
   Timer? _debounce;
+  StreamSubscription<bool>? _connectivitySub;
+  bool _isOffline = false;
 
   Future<void> load({bool forceRefresh = false}) async {
     emit(const TransactionsLoading());
     if (forceRefresh) {
       _snapshotProvider.clearMemory();
     }
+    _isOffline = !await _networkInfo.isOnline;
     await _fetch(reset: true);
   }
 
@@ -93,6 +101,7 @@ final class TransactionsCubit extends Cubit<TransactionsState> {
             hasMore: page.hasMore,
             nextCursor: page.nextCursor,
             isFromCache: page.isFromCache,
+            isOffline: _isOffline,
           ),
         );
       },
@@ -106,9 +115,22 @@ final class TransactionsCubit extends Cubit<TransactionsState> {
     );
   }
 
+  void _onConnectivity(bool online) {
+    _isOffline = !online;
+    final current = state;
+    if (current is! TransactionsSuccess) {
+      return;
+    }
+    if (current.isOffline == _isOffline) {
+      return;
+    }
+    emit(current.copyWith(isOffline: _isOffline));
+  }
+
   @override
   Future<void> close() {
     _debounce?.cancel();
+    _connectivitySub?.cancel();
     return super.close();
   }
 }

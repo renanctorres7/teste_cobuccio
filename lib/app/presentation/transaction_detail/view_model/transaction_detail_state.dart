@@ -14,12 +14,26 @@ final class TransactionDetailLoading extends TransactionDetailState {
 }
 
 final class TransactionDetailSuccess extends TransactionDetailState {
-  const TransactionDetailSuccess(this.transaction);
+  const TransactionDetailSuccess(
+    this.transaction, {
+    this.isOffline = false,
+  });
 
   final TransactionEntity transaction;
+  final bool isOffline;
+
+  TransactionDetailSuccess copyWith({
+    TransactionEntity? transaction,
+    bool? isOffline,
+  }) {
+    return TransactionDetailSuccess(
+      transaction ?? this.transaction,
+      isOffline: isOffline ?? this.isOffline,
+    );
+  }
 
   @override
-  List<Object?> get props => [transaction];
+  List<Object?> get props => [transaction, isOffline];
 }
 
 final class TransactionDetailFailure extends TransactionDetailState {

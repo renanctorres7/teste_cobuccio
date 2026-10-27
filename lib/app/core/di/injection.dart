@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:teste_cobuccio/app/core/network/connectivity_network_info.dart';
 import 'package:teste_cobuccio/app/core/network/dio_client.dart';
+import 'package:teste_cobuccio/app/core/network/network_info.dart';
 import 'package:teste_cobuccio/app/features/dashboard/domain/repository/get_wallet_balance_repository.dart';
 import 'package:teste_cobuccio/app/features/dashboard/domain/repository/get_wallet_summary_repository.dart';
 import 'package:teste_cobuccio/app/features/dashboard/domain/usecases/get_wallet_summary_usecase.dart';
@@ -34,6 +36,7 @@ Future<void> configureDependencies() async {
 
 void _registerCore() {
   getIt.registerLazySingleton<Dio>(DioClient.create);
+  getIt.registerLazySingleton<NetworkInfo>(ConnectivityNetworkInfo.new);
 }
 
 Future<void> _registerData() async {
@@ -55,6 +58,7 @@ void _registerInfra() {
     () => FinancialSnapshotProvider(
       datasource: getIt<CoinMarketDatasource>(),
       cache: getIt<TransactionsLocalCache>(),
+      networkInfo: getIt<NetworkInfo>(),
     ),
   );
   getIt.registerLazySingleton<ListTransactionsRepository>(
@@ -91,18 +95,21 @@ void _registerPresentation() {
       listTransactionsUseCase: getIt(),
       snapshotProvider: getIt(),
       preferences: getIt(),
+      networkInfo: getIt(),
     ),
   );
   getIt.registerFactory(
     () => TransactionsCubit(
       listTransactionsUseCase: getIt(),
       snapshotProvider: getIt(),
+      networkInfo: getIt(),
     ),
   );
   getIt.registerFactoryParam<TransactionDetailCubit, String, void>(
     (id, _) => TransactionDetailCubit(
       getTransactionDetailUseCase: getIt(),
       transactionId: id,
+      networkInfo: getIt(),
     ),
   );
 }

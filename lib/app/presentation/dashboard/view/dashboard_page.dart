@@ -7,6 +7,7 @@ import 'package:teste_cobuccio/app/core/widgets/app_error_view.dart';
 import 'package:teste_cobuccio/app/core/widgets/app_loading_view.dart';
 import 'package:teste_cobuccio/app/core/widgets/balance_card.dart';
 import 'package:teste_cobuccio/app/core/widgets/period_totals_chart.dart';
+import 'package:teste_cobuccio/app/core/widgets/offline_banner.dart';
 import 'package:teste_cobuccio/app/core/widgets/stale_cache_banner.dart';
 import 'package:teste_cobuccio/app/core/widgets/total_card.dart';
 import 'package:teste_cobuccio/app/core/widgets/transaction_tile.dart';
@@ -34,9 +35,11 @@ class DashboardPage extends StatelessWidget {
               :final recentTransactions,
               :final isBalanceHidden,
               :final isFromCache,
+              :final isOffline,
             ) =>
               Column(
                 children: [
+                  if (isOffline) const OfflineBanner(),
                   if (isFromCache) const StaleCacheBanner(),
                   Expanded(
                     child: RefreshIndicator(
